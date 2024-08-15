@@ -13,10 +13,18 @@ Syncify is a full-stack web application that allows users to convert a YouTube p
 
 ## Images
 
-1. ![Home Page](https://github.com/user-attachments/assets/6134fb24-3c34-4eff-8d93-e62dce46635f)
-2. ![YouTube Playlist](https://github.com/user-attachments/assets/bda339d5-b85d-48e5-8678-513b43e5f723)
-3. ![Converted Page](https://github.com/user-attachments/assets/e1cae8c6-08e9-4a3e-a068-adfcbe949f61)
-4. ![Spotify Playlist](https://github.com/user-attachments/assets/e5e68d38-6449-493a-8184-0255890739e6)
+### Home Page
+![Home Page](https://github.com/user-attachments/assets/6134fb24-3c34-4eff-8d93-e62dce46635f)
+
+### YouTube Playlist
+![YouTube Playlist](https://github.com/user-attachments/assets/bda339d5-b85d-48e5-8678-513b43e5f723)
+
+### Converted Page
+![Converted Page](https://github.com/user-attachments/assets/e1cae8c6-08e9-4a3e-a068-adfcbe949f61)
+
+### Spotify Playlist
+![Spotify Playlist](https://github.com/user-attachments/assets/e5e68d38-6449-493a-8184-0255890739e6)
+
 
 ## Project Structure
 
