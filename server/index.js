@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 app.use(cors(
     {
-        origin: 'https://syncify-vishal.netlify.app/',
+        origin: ['https://syncify-vishal.netlify.app/', 'https://syncify-sty0.onrender.com'],
         credentials: true
     }
 ));
@@ -22,6 +22,10 @@ const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI;
 
 app.use('/api', youtubeRoutes);
 app.use('/api', spotifyRoutes);
+
+app.get('/', (req, res) => {
+    res.send('Server is running');
+});
 
 app.get('/auth/spotify', (req, res) => {
     const scopes = 'playlist-modify-private playlist-read-private';
