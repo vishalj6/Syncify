@@ -58,14 +58,14 @@ const Results: React.FC = () => {
           href={playlistLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-4 right-4 bg-gradient-to-r from-green-600 to-teal-700 text-white px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300 ease-in-out"
+          className="fixed bottom-4 right-4 bg-gradient-to-r from-green-600 to-teal-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300 ease-in-out text-lg"
         >
-          <span className="text-lg font-semibold">View Playlist</span>
+          <span className="font-semibold">View Playlist</span>
         </a>
       )}
       <button
         onClick={handleBackClick}
-        className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300"
+        className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 text-lg"
       >
         Back
       </button>
