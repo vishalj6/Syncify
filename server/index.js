@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 app.use(cors(
     {
-        origin: ['https://syncify-vishal.netlify.app/', 'https://syncify-sty0.onrender.com'],
+        origin: ['https://syncify-vishal.netlify.app', 'https://syncify-sty0.onrender.com'],
         credentials: true
     }
 ));
