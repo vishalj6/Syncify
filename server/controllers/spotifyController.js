@@ -104,7 +104,7 @@ const cleanTrackName = (trackName) => {
 
 const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
     const maxRetries = 5; // Maximum number of retries
-    const maxTrackNameLength = 15; // Maximum length for the track name
+    const maxTrackNameLength = 25; // Maximum length for the track name
 
     // Function to clean and truncate track name
     const cleanAndTruncateTrackName = (name) => {
