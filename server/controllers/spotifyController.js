@@ -4,61 +4,49 @@ const SPOTIFY_API_BASE_URL = 'https://api.spotify.com/v1';
 
 const createSpotifyPlaylist = async (accessToken, userId, playlistName) => {
     try {
-        const response = await axios.post(`${SPOTIFY_API_BASE_URL}/users/${userId}/playlists`,
-            {
-                name: playlistName,
-                description: 'A playlist created from YouTube playlist',
-                public: false,
+        const response = await axios.post(`${SPOTIFY_API_BASE_URL}/users/${userId}/playlists`, {
+            name: playlistName,
+            description: 'A playlist created from YouTube playlist',
+            public: false,
+        }, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
             },
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+        });
         return response.data;
     } catch (error) {
+        console.error('Error creating Spotify playlist:', error.message);
         throw new Error('Error creating Spotify playlist');
     }
 };
 
-// Function to get track details from Spotify
 const getTrackDetails = async (accessToken, trackIds) => {
     try {
-        const response = await axios.get(
-            `${SPOTIFY_API_BASE_URL}/tracks`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-                params: {
-                    ids: trackIds.join(','), // Join track IDs with commas
-                },
-            }
-        );
-        return response.data.tracks; // Returns array of track details
+        const response = await axios.get(`${SPOTIFY_API_BASE_URL}/tracks`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+            },
+            params: {
+                ids: trackIds.join(','),
+            },
+        });
+        return response.data.tracks;
     } catch (error) {
-        // Log detailed error response from Spotify
-        if (error.response) {
-            console.error('Spotify API Error:', error.response.data);
-        } else {
-            console.error('Unexpected Error:', error.message);
-        }
+        console.error('Spotify API Error:', error.response ? error.response.data : error.message);
         throw new Error('Error fetching track details');
     }
 };
 
-const MAX_TRACKS_PER_REQUEST = 50; // Spotify's limit for adding tracks in a single request
+const MAX_TRACKS_PER_REQUEST = 50;
 
 const addTracksToSpotifyPlaylist = async (accessToken, playlistId, trackUris) => {
     try {
-        // Add tracks to playlist in batches
         const trackBatches = [];
         for (let i = 0; i < trackUris.length; i += MAX_TRACKS_PER_REQUEST) {
             trackBatches.push(trackUris.slice(i, i + MAX_TRACKS_PER_REQUEST));
         }
 
-        // Array to collect track details
         const allTrackDetails = [];
 
         for (const batch of trackBatches) {
@@ -70,50 +58,35 @@ const addTracksToSpotifyPlaylist = async (accessToken, playlistId, trackUris) =>
                 },
             });
 
-            // Extract track IDs from URIs
             const trackIds = batch.map(uri => uri.split(':')[2]);
-
-            // Fetch track details
             const tracks = await getTrackDetails(accessToken, trackIds);
-
-            // Add the fetched track details to the array
             allTrackDetails.push(...tracks);
-
-            // console.log('Tracks added successfully:', tracks);
         }
 
-        return allTrackDetails; // Return all track details
+        return allTrackDetails;
     } catch (error) {
-        // Log detailed error response from Spotify
-        if (error.response) {
-            console.error('Spotify API Error:', error.response.data);
-        } else {
-            console.error('Unexpected Error:', error.message);
-        }
+        console.error('Spotify API Error:', error.response ? error.response.data : error.message);
         throw new Error('Error adding tracks to Spotify playlist');
     }
 };
 
-
 const cleanTrackName = (trackName) => {
-    // Remove any text in square brackets, parentheses, or similar
-    return trackName.replace(/(\[.*?\]|\(.*?\)|-|\s+by\s+.*$)/g, '') // Remove text in brackets, parentheses, hyphens, and 'by' with remaining text
+    return trackName.replace(/(\[.*?\]|\(.*?\)|-|\s+by\s+.*$)/g, '')
         .trim()
         .replace(/\s+/g, ' ');
 };
 
 const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
-    const maxRetries = 5; // Maximum number of retries
-    const maxTrackNameLength = 25; // Maximum length for the track name
+    const maxRetries = 5;
+    const maxTrackNameLength = 25;
 
-    // Function to clean and truncate track name
     const cleanAndTruncateTrackName = (name) => {
-        const cleanedName = cleanTrackName(name); // Your existing cleaning function
+        const cleanedName = cleanTrackName(name);
         return cleanedName.length > maxTrackNameLength ? cleanedName.substring(0, maxTrackNameLength) : cleanedName;
     };
 
     const cleanedTrackName = cleanAndTruncateTrackName(trackName);
-    const query = `track:${cleanedTrackName}`;
+    const query = `track:${cleanedTrackName} artist:${artistName}`;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
@@ -137,7 +110,7 @@ const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
             if (error.response && error.response.status === 429) {
                 const retryAfter = error.response.headers['retry-after']
                     ? parseInt(error.response.headers['retry-after'], 10) * 1000
-                    : (Math.pow(2, attempt) * 1000); // Use retry-after header if available, else exponential backoff
+                    : (Math.pow(2, attempt) * 1000);
 
                 console.warn(`Rate limit hit, retrying after ${retryAfter}ms... (attempt ${attempt + 1}/${maxRetries})`);
                 await new Promise(resolve => setTimeout(resolve, retryAfter));
