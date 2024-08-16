@@ -5,7 +5,7 @@ const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/playlistItems';
 
 const getYouTubePlaylist = async (accessToken, playlistId) => {
     let allTrackUris = [];
-    let nextPageToken = null; // Start with no page token
+    let nextPageToken = null;
 
     try {
         do {
@@ -14,12 +14,11 @@ const getYouTubePlaylist = async (accessToken, playlistId) => {
                     part: 'snippet',
                     playlistId: playlistId,
                     key: process.env.YOUTUBE_API_KEY,
-                    maxResults: 50, // Fetch 50 items per request, maximum allowed by YouTube API
-                    pageToken: nextPageToken, // Set the page token for pagination
+                    maxResults: 50,
+                    pageToken: nextPageToken,
                 },
             });
 
-            // Process each item in the playlist
             const trackUris = await Promise.all(response.data.items.map(async (item) => {
                 const trackName = item.snippet.title;
                 const artistName = item.snippet.videoOwnerChannelTitle; // Placeholder, refine as needed
@@ -32,12 +31,10 @@ const getYouTubePlaylist = async (accessToken, playlistId) => {
                 }
             }));
 
-            // Append the URIs of the tracks found to the allTrackUris array
             allTrackUris = [...allTrackUris, ...trackUris.filter(uri => uri !== null)];
 
-            // Update nextPageToken for the next request, if it exists
             nextPageToken = response.data.nextPageToken;
-        } while (nextPageToken); // Continue fetching until there is no nextPageToken
+        } while (nextPageToken);
 
         return allTrackUris;
     } catch (error) {
@@ -45,7 +42,5 @@ const getYouTubePlaylist = async (accessToken, playlistId) => {
         throw new Error('Error fetching YouTube playlist');
     }
 };
-
-
 
 export default { getYouTubePlaylist };
