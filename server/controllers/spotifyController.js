@@ -87,7 +87,8 @@ const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
     };
 
     const cleanedTrackName = cleanAndTruncateTrackName(trackName);
-    const query = `track:${cleanedTrackName} artist:${artistName}`;
+    const query = `track:${cleanedTrackName}`;
+    // const query = `track:${cleanedTrackName} artist:${artistName}`;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
