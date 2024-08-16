@@ -14,17 +14,20 @@ Syncify is a full-stack web application that allows users to convert a YouTube p
 ## Images
 
 ### Home Page
+
 ![Home Page](https://github.com/user-attachments/assets/6134fb24-3c34-4eff-8d93-e62dce46635f)
 
 ### YouTube Playlist
+
 ![YouTube Playlist](https://github.com/user-attachments/assets/bda339d5-b85d-48e5-8678-513b43e5f723)
 
 ### Converted Page
+
 ![Converted Page](https://github.com/user-attachments/assets/e1cae8c6-08e9-4a3e-a068-adfcbe949f61)
 
 ### Spotify Playlist
-![Spotify Playlist](https://github.com/user-attachments/assets/e5e68d38-6449-493a-8184-0255890739e6)
 
+![Spotify Playlist](https://github.com/user-attachments/assets/e5e68d38-6449-493a-8184-0255890739e6)
 
 ## Project Structure
 
@@ -62,10 +65,7 @@ Syncify is a full-stack web application that allows users to convert a YouTube p
 Create a `.env` file in the `client` directory with the following variables:
 
 ```env
-VITE_YOUTUBE_API_KEY=your_youtube_api_key
-VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id
-VITE_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-VITE_SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
+VITE_BACKENDURI = http://localhost:5000
 ```
 
 ## Backend
@@ -98,9 +98,8 @@ VITE_SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
 PORT=5000
 SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-SPOTIFY_REDIRECT_URI=http://localhost:5000/callback
+SPOTIFY_REDIRECT_URI= http://localhost:5000/callback
 YOUTUBE_API_KEY=your_youtube_api_key
-SPOTIFY_USER_ID=your_spotify_user_id
 FRONTEND_URI=http://localhost:5173
 ```
 

@@ -14,7 +14,7 @@ const AuthRedirect: React.FC = () => {
   }, []);
 
   const handleAuthorize = () => {
-    window.location.href = 'http://localhost:5000/auth/spotify'; // Redirect to your backend
+    window.location.href = `${import.meta.env.VITE_BACKENDURI || "http://localhost:5000"}/auth/spotify`; // Redirect to your backend
   }
 
   const handleAccessToken = () => {

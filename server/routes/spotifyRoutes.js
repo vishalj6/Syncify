@@ -7,8 +7,6 @@ const spotifyRoutes = express.Router();
 spotifyRoutes.post('/spotify/create-playlist', async (req, res) => {
     const { accessToken, playlistName, trackUris } = req.body;
     try {
-        console.log(accessToken);
-
         // Get the user ID from Spotify
         const userIdResponse = await axios.get('https://api.spotify.com/v1/me', {
             headers: {

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { PlaylistContext } from '../context/PlaylistContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -50,7 +50,7 @@ const Results: React.FC = () => {
           ))}
         </div>
       ) : (
-        <p className="text-white text-lg">No tracks found.</p>
+        <p className="text-white text-3xl">No tracks found.</p>
       )}
       {playlistLink && (
         <a

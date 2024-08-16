@@ -97,12 +97,14 @@ const addTracksToSpotifyPlaylist = async (accessToken, playlistId, trackUris) =>
 
 const cleanTrackName = (trackName) => {
     // Remove any text in square brackets, parentheses, or similar
-    return trackName.replace(/(\[.*?\]|\(.*?\))/g, '').trim();
+    return trackName.replace(/(\[.*?\]|\(.*?\)|-|\s+by\s+.*$)/g, '') // Remove text in brackets, parentheses, hyphens, and 'by' with remaining text
+        .trim()
+        .replace(/\s+/g, ' ');
 };
 
 const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
     const maxRetries = 5; // Maximum number of retries
-    const maxTrackNameLength = 40; // Maximum length for the track name
+    const maxTrackNameLength = 15; // Maximum length for the track name
 
     // Function to clean and truncate track name
     const cleanAndTruncateTrackName = (name) => {

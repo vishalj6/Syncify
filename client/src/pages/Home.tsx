@@ -35,7 +35,7 @@ const Home: React.FC = () => {
     setLoading(true); // Set loading to true when submission starts
 
     try {
-      console.log(accessToken);
+      // console.log(accessToken);
 
       // Fetch tracks from YouTube playlist
       const tracksResponse = await axios.post('/api/youtube/fetch-playlist-tracks', {
@@ -44,7 +44,7 @@ const Home: React.FC = () => {
       });
       const tracks = tracksResponse?.data?.trackUris;
 
-      console.log(tracks);
+      // console.log(tracks);
 
       // Create Spotify playlist
       const playlistResponse = await axios.post('/api/spotify/create-playlist', {
@@ -55,7 +55,7 @@ const Home: React.FC = () => {
 
       setPlaylist(playlistResponse.data.addedPlaylist);
       setPlaylistLink(playlistResponse.data.playlistLink); // Set playlist link in context
-      console.log(playlistResponse.data);
+      // console.log(playlistResponse.data);
 
       toast.success('Successfully Added the playlist to Spotify');
       // Navigate to the Results page with the message and tracks
