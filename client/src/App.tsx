@@ -11,7 +11,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/auth-redirect" element={<AuthRedirect />} />
-        <Route path="/results" element={<Results />} /> {/* Add the Results route */}
+        <Route path="/results" element={<Results />} />
       </Routes>
     </Router>
   );

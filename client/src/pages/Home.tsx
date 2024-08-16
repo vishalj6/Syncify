@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { PlaylistContext } from '../context/PlaylistContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaSpinner } from 'react-icons/fa'; // Import a spinner icon
 import { SiConvertio } from 'react-icons/si';
+import axiosInstance from '../axios';
 
 const Home: React.FC = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -38,7 +38,7 @@ const Home: React.FC = () => {
       // console.log(accessToken);
 
       // Fetch tracks from YouTube playlist
-      const tracksResponse = await axios.post('/api/youtube/fetch-playlist-tracks', {
+      const tracksResponse = await axiosInstance.post('/api/youtube/fetch-playlist-tracks', {
         accessToken,
         playlistId: extractPlaylistId(youtubeUrl),
       });
@@ -47,7 +47,7 @@ const Home: React.FC = () => {
       // console.log(tracks);
 
       // Create Spotify playlist
-      const playlistResponse = await axios.post('/api/spotify/create-playlist', {
+      const playlistResponse = await axiosInstance.post('/api/spotify/create-playlist', {
         accessToken,
         playlistName,
         trackUris: tracks,
