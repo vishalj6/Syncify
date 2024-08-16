@@ -16,6 +16,7 @@ interface ISingleSong {
 const Results: React.FC = () => {
   const { playlist, playlistLink } = useContext(PlaylistContext);
   const navigate = useNavigate();
+
   const handleBackClick = () => {
     navigate('/');
   };
@@ -23,13 +24,13 @@ const Results: React.FC = () => {
   return (
     <div
       style={{ backgroundImage: "url(https://images.pexels.com/photos/7304689/pexels-photo-7304689.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1)" }}
-      className="min-h-screen bg-fixed bg-blend-overlay bg-[#b8bcbcb8] p-6 flex flex-col items-center relative bg-cover"
+      className="min-h-screen bg-fixed bg-blend-overlay bg-black bg-opacity-50 p-6 flex flex-col items-center relative bg-cover"
     >
-      <h1 className="text-4xl font-bold text-white mb-8">Playlist Results</h1>
+      <h1 className="text-4xl md:text-5xl font-bold text-white mb-8">Playlist Results</h1>
       {playlist.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {playlist.map((singleSong: ISingleSong, index: number) => (
-            <div key={index} className="bg-[#111111cf] rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 border-1 border-gray-500">
+            <div key={index} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 border border-gray-600">
               <img
                 src={singleSong.album.images[0]?.url || 'https://via.placeholder.com/300'}
                 alt={singleSong.album.name}
@@ -40,11 +41,11 @@ const Results: React.FC = () => {
                   href={`https://open.spotify.com/track/${singleSong.uri.split(':')[2]}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xl font-semibold text-white hover:text-blue-400 transition-colors duration-300"
+                  className="text-lg font-semibold text-white hover:text-blue-400 transition-colors duration-300"
                 >
                   {singleSong.album.name}
                 </a>
-                <p className="text-gray-300 mt-1">{singleSong.album.artists.map(artist => artist.name).join(', ')}</p>
+                <p className="text-gray-300 mt-1 text-sm">{singleSong.album.artists.map(artist => artist.name).join(', ')}</p>
               </div>
             </div>
           ))}
@@ -61,12 +62,10 @@ const Results: React.FC = () => {
         >
           <span className="text-lg font-semibold">View Playlist</span>
         </a>
-
-
       )}
       <button
         onClick={handleBackClick}
-        className="fixed bottom-4 right-1/2 translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300"
+        className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300"
       >
         Back
       </button>

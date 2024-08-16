@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PlaylistContext } from '../context/PlaylistContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { FaSpinner } from 'react-icons/fa'; // Import a spinner icon
+import { FaSpinner } from 'react-icons/fa';
 import { SiConvertio } from 'react-icons/si';
 import axiosInstance from '../axios';
 
@@ -11,8 +11,8 @@ const Home: React.FC = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [playlistName, setPlaylistName] = useState('');
   const [status, setStatus] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false); // Loading state
-  const { setPlaylist, setPlaylistLink } = useContext(PlaylistContext); // Use context
+  const [loading, setLoading] = useState(false);
+  const { setPlaylist, setPlaylistLink } = useContext(PlaylistContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,19 +32,15 @@ const Home: React.FC = () => {
       return;
     }
 
-    setLoading(true); // Set loading to true when submission starts
+    setLoading(true);
 
     try {
-      // console.log(accessToken);
-
       // Fetch tracks from YouTube playlist
       const tracksResponse = await axiosInstance.post('/api/youtube/fetch-playlist-tracks', {
         accessToken,
         playlistId: extractPlaylistId(youtubeUrl),
       });
       const tracks = tracksResponse?.data?.trackUris;
-
-      // console.log(tracks);
 
       // Create Spotify playlist
       const playlistResponse = await axiosInstance.post('/api/spotify/create-playlist', {
@@ -54,11 +50,9 @@ const Home: React.FC = () => {
       });
 
       setPlaylist(playlistResponse.data.addedPlaylist);
-      setPlaylistLink(playlistResponse.data.playlistLink); // Set playlist link in context
-      // console.log(playlistResponse.data);
+      setPlaylistLink(playlistResponse.data.playlistLink);
 
-      toast.success('Successfully Added the playlist to Spotify');
-      // Navigate to the Results page with the message and tracks
+      toast.success('Successfully added the playlist to Spotify');
       setTimeout(() => {
         navigate('/results', {
           state: {
@@ -70,16 +64,17 @@ const Home: React.FC = () => {
       if (error.response && error.response.status === 401) {
         localStorage.removeItem('spotifyAccessToken');
         setStatus('Session expired. Please re-authenticate with Spotify.');
-        toast.error('Error logging in, please try again.');
+        toast.error('Session expired. Please log in again.');
         setTimeout(() => {
           navigate('/auth-redirect');
         }, 1000);
       } else {
         console.error('Error creating playlist:', error);
-        setStatus('Error creating playlist.');
+        setStatus('Error creating playlist. Please try again.');
+        toast.error('Error creating playlist. Please try again.');
       }
     } finally {
-      setLoading(false); // Set loading to false when submission is complete
+      setLoading(false);
     }
   };
 
@@ -92,12 +87,12 @@ const Home: React.FC = () => {
     <div className="relative min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(https://images.pexels.com/photos/518389/pexels-photo-518389.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1)' }}>
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative z-10 p-6 flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-5xl font-bold text-white mb-8 flex items-center justify-center gap-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-8 flex items-center justify-center gap-4">
           <span>YouTube</span>
-          <SiConvertio />
+          <SiConvertio size={32} />
           <span>Spotify</span>
         </h1>
-        <form onSubmit={handleSubmit} className="bg-white bg-opacity-10 p-8 rounded-lg shadow-lg backdrop-blur-md w-full max-w-2xl space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white bg-opacity-10 p-8 rounded-lg shadow-lg backdrop-blur-md w-full max-w-md md:max-w-lg space-y-6">
           <div>
             <label className="block mb-2 text-gray-300 text-lg font-semibold">YouTube Playlist URL:</label>
             <input
@@ -105,7 +100,7 @@ const Home: React.FC = () => {
               value={youtubeUrl}
               onChange={(e) => setYoutubeUrl(e.target.value)}
               className="border border-gray-400 rounded px-4 py-2 w-full bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              name='youtubePlaylistUrl'
+              name="youtubePlaylistUrl"
               required
             />
           </div>
@@ -116,14 +111,14 @@ const Home: React.FC = () => {
               value={playlistName}
               onChange={(e) => setPlaylistName(e.target.value)}
               className="border border-gray-400 rounded px-4 py-2 w-full bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              name='spotifyPlaylistName'
+              name="spotifyPlaylistName"
               required
             />
           </div>
           <button
             type="submit"
             className={`bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={loading} // Disable button while loading
+            disabled={loading}
           >
             {loading ? <FaSpinner className="animate-spin mx-auto" /> : 'Create Playlist'}
           </button>
