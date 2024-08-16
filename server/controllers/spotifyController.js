@@ -80,13 +80,14 @@ const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
     const maxRetries = 5;
     const maxTrackNameLength = 20;
 
+    // Function to clean and truncate track name
     const cleanAndTruncateTrackName = (name) => {
         const cleanedName = cleanTrackName(name);
         return cleanedName.length > maxTrackNameLength ? cleanedName.substring(0, maxTrackNameLength) : cleanedName;
     };
 
     const cleanedTrackName = cleanAndTruncateTrackName(trackName);
-    const query = `track:${cleanedTrackName}`;
+    const query = `track:${cleanedTrackName} artist:${artistName}`;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
@@ -94,15 +95,20 @@ const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
                 params: {
                     q: query,
                     type: 'track',
-                    limit: 1,
+                    limit: 10, // Increase limit to get more results
+                    market: 'US', // Specify a market if needed
                 },
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                 },
             });
 
-            if (response.data.tracks.items.length > 0) {
-                return response.data.tracks.items[0].id;
+            // Filter results to find the most relevant one
+            const tracks = response.data.tracks.items;
+            const originalTrack = tracks.find(track => track.artists.some(artist => artist.name.toLowerCase() === artistName.toLowerCase()));
+
+            if (originalTrack) {
+                return originalTrack.id;
             } else {
                 throw new Error('No matching track found on Spotify');
             }
@@ -123,6 +129,7 @@ const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
 
     throw new Error('Max retries exceeded for searching track on Spotify');
 };
+
 
 export default { createSpotifyPlaylist, addTracksToSpotifyPlaylist };
 export { searchSpotifyTrack };
