@@ -11,6 +11,10 @@ Syncify is a full-stack web application that allows users to convert a YouTube p
 - Search for tracks on Spotify
 - Responsive user interface
 
+## Live Demo
+
+Experience Syncify in action! 🎉 Check out the live demo here: [Syncify Live Demo](https://syncify-vishal.netlify.app) 🚀
+
 ## Images
 
 ### Home Page
