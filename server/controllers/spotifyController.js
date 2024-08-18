@@ -1,111 +1,85 @@
 import axios from 'axios';
 
 const SPOTIFY_API_BASE_URL = 'https://api.spotify.com/v1';
+const MAX_TRACKS_PER_REQUEST = 50;
+const MAX_RETRIES = 5;
+const MAX_TRACK_NAME_LENGTH = 50;
+const MAX_WORDS = 4;
 
 const cleanTrackName = (trackName) => {
     return trackName
-        .replace(/[\[\]\(\)'"-]/g, '')  // Remove brackets, quotes, hyphens, and parentheses
-        .replace(/\s+by\s+.*$/, '')    // Remove "by" and anything after it
+        .replace(/[\[\]\(\)'"-]/g, '')
+        .replace(/\s+by\s+.*$/, '')
         .trim()
-        .replace(/\s+/g, ' ');         // Collapse multiple spaces into a single space
+        .replace(/\s+/g, ' ');
 };
 
-const searchSpotifyTrack = async (accessToken, trackName) => {
-    const maxRetries = 5;
-    const maxTrackNameLength = 50; // Increased length to accommodate more comprehensive search terms
-    const maxWords = 4; // Maximum number of words to use in search
-
-    // Function to clean and truncate track name
+const searchSpotifyTrack = async (accessToken, trackName, artistName) => {
     const cleanAndTruncateTrackName = (name, wordCount) => {
         const cleanedName = cleanTrackName(name);
         const words = cleanedName.split(' ').slice(0, wordCount).join(' ');
-        return words.length > maxTrackNameLength ? words.substring(0, maxTrackNameLength) : words;
+        return words.length > MAX_TRACK_NAME_LENGTH ? words.substring(0, MAX_TRACK_NAME_LENGTH) : words;
     };
 
-    // Function to filter out unwanted tracks
     const isValidTrack = (track) => {
         const name = track.name.toLowerCase();
         const albumName = track.album.name.toLowerCase();
-        return !name.includes('cover') &&
-            !name.includes('karaoke') &&
-            !name.includes('tribute') &&
-            !albumName.includes('cover') &&
-            !albumName.includes('karaoke') &&
-            !albumName.includes('tribute') &&
-            !name.includes('originally performed by') &&
-            !albumName.includes('originally performed by') &&
-            !name.includes('made popular by') &&
-            !albumName.includes('made popular by');
+        return !/(cover|karaoke|tribute|originally performed by|made popular by)/.test(name) &&
+            !/(cover|karaoke|tribute|originally performed by|made popular by)/.test(albumName);
     };
 
-    // Function to search for track on Spotify
     const searchTrack = async (query) => {
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
             try {
                 const response = await axios.get(`${SPOTIFY_API_BASE_URL}/search`, {
-                    params: {
-                        q: query,
-                        type: 'track',
-                        limit: 10,
-                        market: 'US',
-                    },
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                    },
+                    params: { q: query, type: 'track', limit: 10, market: 'US' },
+                    headers: { 'Authorization': `Bearer ${accessToken}` },
                 });
 
                 const tracks = response.data.tracks.items;
                 const validTracks = tracks.filter(isValidTrack).sort((a, b) => b.popularity - a.popularity);
 
                 if (validTracks.length > 0) {
-                    return validTracks[0].id; // Return the most popular valid track
-                } else {
-                    throw new Error('No valid matching track found on Spotify');
+                    return validTracks[0].id;
                 }
-            } catch (error) {
-                if (error.response && error.response.status === 429) {
-                    const retryAfter = error.response.headers['retry-after']
-                        ? parseInt(error.response.headers['retry-after'], 10) * 1000
-                        : (Math.pow(2, attempt) * 1000);
 
-                    console.warn(`Rate limit hit, retrying after ${retryAfter}ms... (attempt ${attempt + 1}/${maxRetries})`);
-                    await new Promise(resolve => setTimeout(resolve, retryAfter));
-                } else {
-                    console.error('Error searching for track on Spotify:', error.message);
-                    throw new Error('Error searching for track on Spotify');
+                throw new Error('No valid matching track found on Spotify');
+            } catch (error) {
+                if (error.response) {
+                    if (error.response.status === 429) {
+                        const retryAfter = parseInt(error.response.headers['retry-after'], 10) * 1000 || Math.pow(2, attempt) * 1000;
+                        console.warn(`Rate limit hit, retrying after ${retryAfter}ms... (attempt ${attempt + 1}/${MAX_RETRIES})`);
+                        await new Promise(resolve => setTimeout(resolve, retryAfter));
+                    } else if (error.response.status === 401) {
+                        throw new Error('Unauthorized: Invalid or expired token');
+                    }
                 }
+                console.error('Error searching for track on Spotify:', error.message);
+                if (attempt === MAX_RETRIES - 1) throw new Error('Max retries exceeded for searching track on Spotify');
             }
         }
-
-        throw new Error('Max retries exceeded for searching track on Spotify');
     };
 
-    // Try different lengths of track name
-    for (let wordCount = 3; wordCount <= maxWords; wordCount++) {
-        const query = `track:${cleanAndTruncateTrackName(trackName, wordCount)}`;
+    for (let wordCount = 3; wordCount <= MAX_WORDS; wordCount++) {
+        const query = `track:${cleanAndTruncateTrackName(trackName, wordCount)}${artistName ? ` artist:${artistName}` : ''}`;
         try {
             const trackId = await searchTrack(query);
             return trackId;
         } catch (error) {
-            if (error.message !== 'No valid matching track found on Spotify') {
-                throw error; // If error is not 'No valid matching track found', rethrow it
-            }
-            console.log(`No track found with ${wordCount} words. Trying with more words...`);
+            if (error.message !== 'No valid matching track found on Spotify') throw error;
+            console.log(`No track found with ${wordCount} words. Trying with fewer words...`);
         }
     }
 
-    // Fallback search using only 2 words from the track name
-    const fallbackQuery = `track:${cleanAndTruncateTrackName(trackName, 2)}`;
+    const fallbackQuery = `track:${cleanAndTruncateTrackName(trackName, 2)}${artistName ? ` artist:${artistName}` : ''}`;
     try {
         const trackId = await searchTrack(fallbackQuery);
         return trackId;
-    } catch (error) {
+    } catch {
         console.error('No track found with 2 words. Returning null.');
-        return null; // Return null if no track found with 2 words
+        return null;
     }
 };
-
-
 
 const createSpotifyPlaylist = async (accessToken, userId, playlistName) => {
     try {
@@ -129,21 +103,21 @@ const createSpotifyPlaylist = async (accessToken, userId, playlistName) => {
 const getTrackDetails = async (accessToken, trackIds) => {
     try {
         const response = await axios.get(`${SPOTIFY_API_BASE_URL}/tracks`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            params: {
-                ids: trackIds.join(','),
-            },
+            headers: { 'Authorization': `Bearer ${accessToken}` },
+            params: { ids: trackIds.join(',') },
         });
         return response.data.tracks;
     } catch (error) {
-        console.error('Spotify API Error:', error.response ? error.response.data : error.message);
+        if (error.response && error.response.status === 429) {
+            const retryAfter = parseInt(error.response.headers['retry-after'], 10) * 1000;
+            console.warn(`Rate limit hit while fetching track details, retrying after ${retryAfter}ms...`);
+            await new Promise(resolve => setTimeout(resolve, retryAfter));
+            return getTrackDetails(accessToken, trackIds); // Retry after delay
+        }
+        console.error('Error fetching track details:', error.message);
         throw new Error('Error fetching track details');
     }
 };
-
-const MAX_TRACKS_PER_REQUEST = 50;
 
 const addTracksToSpotifyPlaylist = async (accessToken, playlistId, trackUris) => {
     try {
@@ -155,8 +129,7 @@ const addTracksToSpotifyPlaylist = async (accessToken, playlistId, trackUris) =>
         const allTrackDetails = [];
 
         for (const batch of trackBatches) {
-            const requestBody = { uris: batch };
-            await axios.post(`${SPOTIFY_API_BASE_URL}/playlists/${playlistId}/tracks`, requestBody, {
+            await axios.post(`${SPOTIFY_API_BASE_URL}/playlists/${playlistId}/tracks`, { uris: batch }, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
@@ -170,10 +143,13 @@ const addTracksToSpotifyPlaylist = async (accessToken, playlistId, trackUris) =>
 
         return allTrackDetails;
     } catch (error) {
-        console.error('Spotify API Error:', error.response ? error.response.data : error.message);
+        console.error('Error adding tracks to Spotify playlist:', error.message);
         throw new Error('Error adding tracks to Spotify playlist');
     }
 };
 
-export default { createSpotifyPlaylist, addTracksToSpotifyPlaylist };
-export { searchSpotifyTrack };
+export {
+    searchSpotifyTrack,
+    createSpotifyPlaylist,
+    addTracksToSpotifyPlaylist,
+};

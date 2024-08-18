@@ -1,6 +1,6 @@
 import express from 'express';
 import axios from 'axios';
-import spotifyController from '../controllers/spotifyController.js';
+import { createSpotifyPlaylist, addTracksToSpotifyPlaylist } from '../controllers/spotifyController.js';
 
 const spotifyRoutes = express.Router();
 
@@ -16,8 +16,8 @@ spotifyRoutes.post('/spotify/create-playlist', async (req, res) => {
         const userId = userIdResponse.data.id;
 
         // Create Spotify playlist and add tracks
-        const playlist = await spotifyController.createSpotifyPlaylist(accessToken, userId, playlistName);
-        const addedPlaylist = await spotifyController.addTracksToSpotifyPlaylist(accessToken, playlist.id, trackUris);
+        const playlist = await createSpotifyPlaylist(accessToken, userId, playlistName);
+        const addedPlaylist = await addTracksToSpotifyPlaylist(accessToken, playlist.id, trackUris);
 
         // Construct the playlist link
         const playlistLink = `https://open.spotify.com/playlist/${playlist.id}`;
